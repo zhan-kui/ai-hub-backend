@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aihub.mapper.UserResourceAuthMapper">
+
+    <select id="existsValidAuth" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM user_resource_auth
+        WHERE user_id = #{userId}
+          AND resource_type = #{resourceType}
+          AND resource_id = #{resourceId}
+          AND status = 1
+          AND (expire_at IS NULL OR expire_at > NOW())
+    </select>
+
+    <select id="selectValidResourceIds" resultType="java.lang.Long">
+        SELECT resource_id
+        FROM user_resource_auth
+        WHERE user_id = #{userId}
+          AND resource_type = #{resourceType}
+          AND status = 1
+          AND (expire_at IS NULL OR expire_at > NOW())
+        ORDER BY id DESC
+    </select>
+
+    <update id="revokeByUserAndType">
+        UPDATE user_resource_auth
+        SET status = 0,
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+          AND resource_type = #{resourceType}
+          AND status = 1
+    </update>
+
+    <insert id="upsertAuth">
+        INSERT INTO user_resource_auth (
+            user_id,
+            resource_type,
+            resource_id,
+            granted_by,
+            status
+        ) VALUES (
+            #{userId},
+            #{resourceType},
+            #{resourceId},
+            #{grantedBy},
+            1
+        )
+        ON DUPLICATE KEY UPDATE
+            granted_by = VALUES(granted_by),
+            status = 1,
+            expire_at = NULL,
+            updated_at = NOW()
+    </insert>
+
+</mapper>

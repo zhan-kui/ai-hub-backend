@@ -1,0 +1,78 @@
+﻿spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DB:aihub}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:123456}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        type:
+          preferred_boolean_jdbc_type: TINYINT
+
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+# ---- Dify 对接配置 ----
+dify:
+  api:
+    base-url: ${DIFY_BASE_URL:http://localhost/v1}
+    connect-timeout: 10000
+    read-timeout: 120000
+    max-in-memory-size: 10485760
+
+# ---- JWT 配置 ----
+jwt:
+  secret: ${JWT_SECRET:aihubSecretKeyForJwtTokenGeneration2026PleaseChangeInProd}
+  expiration: ${JWT_EXPIRATION:604800000}
+  header: Authorization
+  prefix: "Bearer "
+
+# ---- Security 白名单 ----
+# 注意：这些路径是相对于 context-path 之后的路径
+# Spring Security 的 requestMatchers 在 servlet context 内部匹配
+security:
+  ignore-urls:
+    - /auth/login
+    - /auth/register
+    - /auth/captcha/**
+    - /doc.html
+    - /webjars/**
+    - /swagger-ui/**
+    - /v3/api-docs/**
+    - /favicon.ico
+    - /system/health
+logging:
+  level:
+    root: INFO
+    com.aihub: DEBUG
+    org.springframework.security: DEBUG
+  file:
+    name: logs/aihub-backend.log
+  logback:
+    rollingpolicy:
+      max-file-size: 50MB
+      max-history: 30

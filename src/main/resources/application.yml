@@ -1,0 +1,45 @@
+server:
+  port: 8088
+  servlet:
+    context-path: /aihub-api
+
+spring:
+  application:
+    name: aihub-backend
+  profiles:
+    active: dev
+  threads:
+    virtual:
+      enabled: true
+  jackson:
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+  mvc:
+    async:
+      request-timeout: 180000
+
+# ---- JPA + MyBatis-Plus 共存配置 ----
+# JPA 扫描 repository 包，MyBatis-Plus 扫描 mapper 包
+# 具体隔离通过 JpaConfig 和 MybatisPlusConfig 实现
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.aihub.entity
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+springdoc:
+  swagger-ui:
+    path: /doc.html
+  api-docs:
+    path: /v3/api-docs

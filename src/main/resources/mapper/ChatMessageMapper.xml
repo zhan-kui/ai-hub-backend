@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aihub.mapper.ChatMessageMapper">
+
+    <select id="selectByConversationId" resultType="com.aihub.entity.ChatMessage">
+        SELECT id,
+               conversation_id,
+               user_id,
+               app_config_id,
+               dify_message_id,
+               dify_conversation_id,
+               role,
+               query,
+               answer,
+               prompt_tokens,
+               completion_tokens,
+               total_tokens,
+               total_price,
+               latency,
+               feedback,
+               deleted,
+               created_at
+        FROM chat_message
+        WHERE conversation_id = #{conversationId}
+          AND deleted = 0
+        ORDER BY id ASC
+    </select>
+
+</mapper>
