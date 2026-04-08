@@ -3,6 +3,7 @@ package com.aihub.config;
 import com.aihub.security.JwtAccessDeniedHandler;
 import com.aihub.security.JwtAuthenticationEntryPoint;
 import com.aihub.security.JwtAuthenticationFilter;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,9 +52,11 @@ public class SecurityConfig {
             .sessionManagement(session ->
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex
+                    // 处理未授权放行所有的异步 Dispatch 请求
                     .authenticationEntryPoint(authenticationEntryPoint)
                     .accessDeniedHandler(accessDeniedHandler))
             .authorizeHttpRequests(auth -> auth
+                    .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
                     .requestMatchers(ignoreUrls).permitAll()
                     .anyRequest().authenticated()
             )

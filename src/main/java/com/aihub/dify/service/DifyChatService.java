@@ -42,13 +42,18 @@ public class DifyChatService {
         DifyChatRequest difyRequest = DifyChatRequest.builder()
                 .inputs(request.getInputs() != null ? request.getInputs() : Map.of())
                 .query(request.getQuery())
-                .user("user-" + userId)
+                .user("abc-123" )
                 .responseMode("streaming")
                 .conversationId(request.getConversationId())
                 .build();
 
+
+        log.info("Dify SSE 请求: {}", difyRequest);
+
+
         StreamContext context = new StreamContext(appId, userId, request.getQuery());
 
+        log.info("应用信息： {}" , app);
         webClient.mutate().baseUrl(baseUrl).build()
                 .post()
                 .uri("/chat-messages")
@@ -67,6 +72,7 @@ public class DifyChatService {
                             emitter.completeWithError(error);
                         },
                         () -> {
+                            log.info("context历史聊天记录保存内容：{}",context);
                             saveHistorySafely(context, null);
                             emitter.complete();
                         }
@@ -162,6 +168,8 @@ public class DifyChatService {
             }
 
             try {
+                //  加上这一行，打印最原始的 Dify 返回的 JSON 字符串！
+                log.info("原始 Dify SSE 数据: {}", payload);
                 DifyStreamEvent event = objectMapper.readValue(payload, DifyStreamEvent.class);
                 dispatchEvent(event, emitter, context);
             } catch (Exception ex) {
@@ -223,12 +231,24 @@ public class DifyChatService {
                 saveHistorySafely(context, event.getMetadata());
                 emitter.complete();
             }
-            case "ping" -> safeSend(emitter, "ping", "");
+            // 新增 Dify 工作流事件处理
+            case "workflow_started", "node_started" -> {
+                log.debug("Dify节点开始: {}", event.getEvent());
+                // 可选：通知前端 AI 正在执行动作
+                safeSend(emitter, "status", Map.of("status", "processing", "event", event.getEvent()));
+            }
+            case "workflow_finished", "node_finished" -> {
+                log.debug("Dify节点结束: {}", event.getEvent());
+            }
+            case "tts_message", "tts_message_end" -> {
+                // 如果开启了语音 TTS 会有这个
+            }
             default -> log.debug("未知 Dify 事件: {}", event.getEvent());
         }
     }
 
     private void saveHistorySafely(StreamContext context, Map<String, Object> metadata) {
+        log.error("保存聊天记录context: {}", context);
         if (!context.saved.compareAndSet(false, true)) {
             return;
         }
