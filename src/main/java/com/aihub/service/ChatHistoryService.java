@@ -6,6 +6,7 @@ import com.aihub.mapper.ChatMessageMapper;
 import com.aihub.repository.ConversationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -23,9 +24,11 @@ public class ChatHistoryService {
     private final ChatMessageMapper chatMessageMapper;
 
     @Transactional(rollbackFor = Exception.class)
+    @Async
     public void saveRound(Long appId,
                           Long userId,
                           String query,
+                          String thought,
                           String answer,
                           String difyConversationId,
                           String difyMessageId,
@@ -44,6 +47,7 @@ public class ChatHistoryService {
         message.setDifyMessageId(difyMessageId);
         message.setRole("assistant");
         message.setQuery(query);
+        message.setThought(thought);
         message.setAnswer(answer);
         message.setFeedback(null);
         message.setDeleted(false);

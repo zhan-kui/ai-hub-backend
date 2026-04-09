@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aihub.mapper.MenuMapper">
+
+    <resultMap id="MenuResultMap" type="com.aihub.entity.Menu">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="parent_id" property="parentId" jdbcType="BIGINT"/>
+        <result column="menu_name" property="menuName" jdbcType="VARCHAR"/>
+        <result column="menu_type" property="menuType" jdbcType="VARCHAR"/>
+        <result column="path" property="path" jdbcType="VARCHAR"/>
+        <result column="component" property="component" jdbcType="VARCHAR"/>
+        <result column="permission" property="permission" jdbcType="VARCHAR"/>
+        <result column="icon" property="icon" jdbcType="VARCHAR"/>
+        <result column="sort" property="sort" jdbcType="INTEGER"/>
+        <result column="visible" property="visible" jdbcType="TINYINT"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="deleted" property="deleted" jdbcType="TINYINT"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, parent_id, menu_name, menu_type, path, component, permission, icon,
+        sort, visible, status, deleted, created_at, updated_at
+    </sql>
+
+    <sql id="AliasColumns">
+        m.id, m.parent_id, m.menu_name, m.menu_type, m.path, m.component, m.permission, m.icon,
+        m.sort, m.visible, m.status, m.deleted, m.created_at, m.updated_at
+    </sql>
+
+    <select id="selectAllEnabledMenus" resultMap="MenuResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_menu
+        WHERE deleted = 0
+          AND status = 1
+        ORDER BY parent_id ASC, sort ASC, id ASC
+    </select>
+
+    <select id="selectEnabledMenusByRoleId" resultMap="MenuResultMap">
+        SELECT <include refid="AliasColumns"/>
+        FROM sys_menu m
+                 INNER JOIN sys_role_menu rm ON m.id = rm.menu_id
+        WHERE rm.role_id = #{roleId}
+          AND m.deleted = 0
+          AND m.status = 1
+        ORDER BY m.parent_id ASC, m.sort ASC, m.id ASC
+    </select>
+
+    <select id="selectAllPermissions" resultType="java.lang.String">
+        SELECT DISTINCT permission
+        FROM sys_menu
+        WHERE deleted = 0
+          AND status = 1
+          AND permission IS NOT NULL
+          AND permission != ''
+        ORDER BY permission ASC
+    </select>
+
+    <select id="selectPermissionsByRoleId" resultType="java.lang.String">
+        SELECT DISTINCT m.permission
+        FROM sys_menu m
+                 INNER JOIN sys_role_menu rm ON m.id = rm.menu_id
+        WHERE rm.role_id = #{roleId}
+          AND m.deleted = 0
+          AND m.status = 1
+          AND m.permission IS NOT NULL
+          AND m.permission != ''
+        ORDER BY m.permission ASC
+    </select>
+
+</mapper>

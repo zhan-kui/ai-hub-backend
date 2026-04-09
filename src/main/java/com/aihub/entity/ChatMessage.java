@@ -82,4 +82,8 @@ public class ChatMessage {
     @Column(name = "created_at", updatable = false)
     @TableField("created_at")
     private LocalDateTime createdAt;
+
+    // 增加思考过程字段配置 (推荐使用 text 类型防止思考过程过长装不下)
+    @Column(name = "thought", columnDefinition = "TEXT")
+    private String thought;
 }

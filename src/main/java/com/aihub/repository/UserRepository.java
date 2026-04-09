@@ -18,6 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByUsernameAndDeletedFalse(String username);
 
+    long countByDeletedFalse();
+
     @Modifying
     @Transactional
     @Query("update User u set u.lastLoginAt = :lastLoginAt where u.id = :userId")
