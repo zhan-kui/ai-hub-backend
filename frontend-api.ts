@@ -153,6 +153,7 @@ export interface SseEventPayload {
 export interface StreamChatHandlers {
   onOpen?: () => void;
   onMessage?: (data: any) => void;
+  onThinkingDelta?: (data: any) => void;
   onMessageEnd?: (data: any) => void;
   onMessageReplace?: (data: any) => void;
   onPing?: (data: any) => void;
@@ -378,6 +379,9 @@ export const chatApi = {
         switch (event.event) {
           case 'message':
             options.handlers?.onMessage?.(event.data);
+            break;
+          case 'thinking':
+            options.handlers?.onThinkingDelta?.(event.data);
             break;
           case 'message_end':
             options.handlers?.onMessageEnd?.(event.data);
