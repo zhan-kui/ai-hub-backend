@@ -17,4 +17,6 @@ public class RegisterUserRequest {
     private String nickname;
     private String email;
     private String phone;
+    private Long roleId;
+    private Long deptId;
 }

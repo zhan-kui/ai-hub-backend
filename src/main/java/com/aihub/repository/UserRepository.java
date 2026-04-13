@@ -18,6 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByUsernameAndDeletedFalse(String username);
 
+    boolean existsByDeptIdAndDeletedFalse(Long deptId);
+
     long countByDeletedFalse();
 
     @Modifying

@@ -5,9 +5,11 @@ import com.aihub.dto.auth.RegisterUserRequest;
 import com.aihub.dto.user.ChangePasswordRequest;
 import com.aihub.dto.user.UpdateUserRequest;
 import com.aihub.dto.user.UserInfoVO;
+import com.aihub.entity.Dept;
 import com.aihub.entity.Role;
 import com.aihub.entity.User;
 import com.aihub.mapper.UserMapper;
+import com.aihub.repository.DeptRepository;
 import com.aihub.repository.RoleRepository;
 import com.aihub.repository.UserRepository;
 import com.aihub.security.SecurityUtils;
@@ -31,6 +33,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final DeptRepository deptRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -109,8 +112,27 @@ public class UserService {
             throw new BizException(400, "用户名已存在");
         }
 
-        Role defaultRole = roleRepository.findByCodeAndDeletedFalse("user")
-                .orElseThrow(() -> new BizException(500, "默认角色不存在"));
+        Dept dept = null;
+        if (request.getDeptId() != null) {
+            dept = deptRepository.findByIdAndDeletedFalse(request.getDeptId())
+                    .orElseThrow(() -> new BizException(404, "部门不存在"));
+        }
+
+        Role roleToUse = null;
+        if (request.getRoleId() != null) {
+            roleToUse = roleRepository.findById(request.getRoleId())
+                    .filter(role -> !Boolean.TRUE.equals(role.getDeleted()))
+                    .orElseThrow(() -> new BizException(404, "角色不存在"));
+        } else if (dept != null && dept.getDefaultRoleId() != null) {
+            roleToUse = roleRepository.findById(dept.getDefaultRoleId())
+                    .filter(role -> !Boolean.TRUE.equals(role.getDeleted()))
+                    .orElse(null);
+        }
+
+        if (roleToUse == null) {
+            roleToUse = roleRepository.findByCodeAndDeletedFalse("user")
+                    .orElseThrow(() -> new BizException(500, "默认角色不存在"));
+        }
 
         User user = new User();
         user.setUsername(request.getUsername());
@@ -119,12 +141,13 @@ public class UserService {
                 ? request.getNickname() : request.getUsername());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setRoleId(defaultRole.getId());
+        user.setDeptId(dept != null ? dept.getId() : null);
+        user.setRoleId(roleToUse.getId());
         user.setStatus(1);
         user.setDeleted(false);
 
         User saved = userRepository.save(user);
-        return toVO(saved, defaultRole);
+        return toVO(saved, roleToUse);
     }
 
     @Transactional(rollbackFor = Exception.class)

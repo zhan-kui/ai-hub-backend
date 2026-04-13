@@ -71,4 +71,6 @@ public class MenuSaveRequest {
      */
 
     private Boolean status;
+
+    private String platform;
 }

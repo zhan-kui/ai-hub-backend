@@ -45,6 +45,10 @@ public class User {
     @TableField("role_id")
     private Long roleId;
 
+    @Column(name = "dept_id")
+    @TableField("dept_id")
+    private Long deptId;
+
     @Column(columnDefinition = "TINYINT")
     private Integer status;
 

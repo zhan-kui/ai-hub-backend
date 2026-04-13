@@ -14,9 +14,19 @@ public interface MenuMapper extends BaseMapper<Menu> {
 
     List<Menu> selectAllEnabledMenus();
 
+    List<Menu> selectAllEnabledMenusByPlatform(@Param("platform") String platform);
+
     List<Menu> selectEnabledMenusByRoleId(@Param("roleId") Long roleId);
+
+    List<Menu> selectEnabledMenusByRoleIdAndPlatform(@Param("roleId") Long roleId,
+                                                      @Param("platform") String platform);
 
     List<String> selectAllPermissions();
 
+    List<String> selectAllPermissionsByPlatform(@Param("platform") String platform);
+
     List<String> selectPermissionsByRoleId(@Param("roleId") Long roleId);
+
+    List<String> selectPermissionsByRoleIdAndPlatform(@Param("roleId") Long roleId,
+                                                       @Param("platform") String platform);
 }

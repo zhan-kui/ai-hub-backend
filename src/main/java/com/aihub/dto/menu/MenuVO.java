@@ -84,6 +84,8 @@ public class MenuVO {
      */
 
     private Boolean status;
+
+    private String platform;
     /**
      * 字段：createdAt。
      * <p>用于承载当前对象的状态数据，具体业务语义请结合上下文与调用方理解。

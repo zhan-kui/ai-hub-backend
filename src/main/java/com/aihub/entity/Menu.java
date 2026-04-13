@@ -102,6 +102,10 @@ public class Menu {
 
     @Column(columnDefinition = "TINYINT")
     private Boolean status;
+
+    @Column(name = "platform", nullable = false, length = 20)
+    @TableField("platform")
+    private String platform;
     /**
      * 字段：deleted。
      * <p>用于承载当前对象的状态数据，具体业务语义请结合上下文与调用方理解。

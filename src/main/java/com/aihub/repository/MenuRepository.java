@@ -16,6 +16,8 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     List<Menu> findAllByDeletedFalseOrderBySortAscIdAsc();
 
+    List<Menu> findAllByDeletedFalseAndPlatformInOrderBySortAscIdAsc(List<String> platforms);
+
     List<Menu> findAllByIdInAndDeletedFalseOrderBySortAscIdAsc(List<Long> ids);
 
     boolean existsByParentIdAndDeletedFalse(Long parentId);

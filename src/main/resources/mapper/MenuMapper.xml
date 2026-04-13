@@ -16,6 +16,7 @@
         <result column="sort" property="sort" jdbcType="INTEGER"/>
         <result column="visible" property="visible" jdbcType="TINYINT"/>
         <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="platform" property="platform" jdbcType="VARCHAR"/>
         <result column="deleted" property="deleted" jdbcType="TINYINT"/>
         <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
         <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
@@ -23,12 +24,12 @@
 
     <sql id="BaseColumns">
         id, parent_id, menu_name, menu_type, path, component, permission, icon,
-        sort, visible, status, deleted, created_at, updated_at
+        sort, visible, status, platform, deleted, created_at, updated_at
     </sql>
 
     <sql id="AliasColumns">
         m.id, m.parent_id, m.menu_name, m.menu_type, m.path, m.component, m.permission, m.icon,
-        m.sort, m.visible, m.status, m.deleted, m.created_at, m.updated_at
+        m.sort, m.visible, m.status, m.platform, m.deleted, m.created_at, m.updated_at
     </sql>
 
     <select id="selectAllEnabledMenus" resultMap="MenuResultMap">
@@ -49,6 +50,26 @@
         ORDER BY m.parent_id ASC, m.sort ASC, m.id ASC
     </select>
 
+    <select id="selectAllEnabledMenusByPlatform" resultMap="MenuResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_menu
+        WHERE deleted = 0
+          AND status = 1
+          AND (platform = #{platform} OR platform = 'all')
+        ORDER BY parent_id ASC, sort ASC, id ASC
+    </select>
+
+    <select id="selectEnabledMenusByRoleIdAndPlatform" resultMap="MenuResultMap">
+        SELECT <include refid="AliasColumns"/>
+        FROM sys_menu m
+                 INNER JOIN sys_role_menu rm ON m.id = rm.menu_id
+        WHERE rm.role_id = #{roleId}
+          AND m.deleted = 0
+          AND m.status = 1
+          AND (m.platform = #{platform} OR m.platform = 'all')
+        ORDER BY m.parent_id ASC, m.sort ASC, m.id ASC
+    </select>
+
     <select id="selectAllPermissions" resultType="java.lang.String">
         SELECT DISTINCT permission
         FROM sys_menu
@@ -66,6 +87,30 @@
         WHERE rm.role_id = #{roleId}
           AND m.deleted = 0
           AND m.status = 1
+          AND m.permission IS NOT NULL
+          AND m.permission != ''
+        ORDER BY m.permission ASC
+    </select>
+
+    <select id="selectAllPermissionsByPlatform" resultType="java.lang.String">
+        SELECT DISTINCT permission
+        FROM sys_menu
+        WHERE deleted = 0
+          AND status = 1
+          AND (platform = #{platform} OR platform = 'all')
+          AND permission IS NOT NULL
+          AND permission != ''
+        ORDER BY permission ASC
+    </select>
+
+    <select id="selectPermissionsByRoleIdAndPlatform" resultType="java.lang.String">
+        SELECT DISTINCT m.permission
+        FROM sys_menu m
+                 INNER JOIN sys_role_menu rm ON m.id = rm.menu_id
+        WHERE rm.role_id = #{roleId}
+          AND m.deleted = 0
+          AND m.status = 1
+          AND (m.platform = #{platform} OR m.platform = 'all')
           AND m.permission IS NOT NULL
           AND m.permission != ''
         ORDER BY m.permission ASC
